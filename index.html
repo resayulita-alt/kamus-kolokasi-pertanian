@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kamus Kolokasi Pertanian - BINGPRO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0a0f1a;min-height:100vh;color:#e2e8f0}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#065f46,#047857);padding:20px 16px 16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.header h1{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:2px}
+.header p{font-size:0.72rem;color:#a7f3d0}
+.badge-row{display:flex;justify-content:center;gap:8px;margin-top:8px}
+.badge{background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:20px;font-size:0.65rem;color:#d1fae5}
+
+/* SEARCH */
+.search-box{padding:12px 16px;position:sticky;top:90px;z-index:99;background:#0a0f1a}
+.search-input{width:100%;padding:12px 16px 12px 44px;border-radius:12px;border:1px solid #1e293b;background:#1e293b;color:#e2e8f0;font-size:0.9rem;font-family:inherit;outline:none;transition:0.2s}
+.search-input:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,0.15)}
+.search-icon{position:absolute;left:28px;top:50%;transform:translateY(-50%);font-size:1rem;opacity:0.5}
+
+/* FILTERS */
+.filters{padding:0 16px 8px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid #334155;background:transparent;color:#94a3b8;font-size:0.72rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:0.2s}
+.filter-btn.active{background:#10b981;border-color:#10b981;color:#fff;font-weight:600}
+.filter-btn:hover{border-color:#10b981;color:#e2e8f0}
+
+/* STATS */
+.stats{padding:0 16px 8px;display:flex;gap:8px}
+.stat-card{flex:1;background:#1e293b;border-radius:10px;padding:10px;text-align:center;border:1px solid #334155}
+.stat-num{font-size:1.3rem;font-weight:700;color:#10b981}
+.stat-label{font-size:0.6rem;color:#64748b;margin-top:2px}
+
+/* RESULTS */
+.results{padding:0 16px 100px}
+.result-count{font-size:0.72rem;color:#64748b;margin-bottom:8px;padding:0 4px}
+
+/* CARD */
+.card{background:#1e293b;border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid #334155;transition:0.2s;cursor:pointer}
+.card:hover{border-color:#10b981;transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.collocation{font-size:1rem;font-weight:700;color:#10b981;line-height:1.3}
+.category-badge{padding:2px 8px;border-radius:12px;font-size:0.6rem;font-weight:600;white-space:nowrap;flex-shrink:0}
+.cat-persiapan{background:rgba(59,130,246,0.15);color:#60a5fa}
+.cat-penanaman{background:rgba(16,185,129,0.15);color:#34d399}
+.cat-pemupukan{background:rgba(251,191,36,0.15);color:#fbbf24}
+.cat-pengelolaan{background:rgba(168,85,247,0.15);color:#a78bfa}
+.cat-hama{background:rgba(239,68,68,0.15);color:#f87171}
+.cat-panen{background:rgba(245,158,11,0.15);color:#fbbf24}
+.cat-umum{background:rgba(100,116,139,0.15);color:#94a3b8}
+
+.card-body{margin-top:8px}
+.meaning{font-size:0.78rem;color:#cbd5e1;margin-bottom:4px;line-height:1.5}
+.meaning strong{color:#e2e8f0}
+.example{font-size:0.72rem;color:#64748b;font-style:italic;padding-left:10px;border-left:2px solid #334155;margin-top:6px;line-height:1.5}
+.synonyms{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.syn-tag{background:rgba(16,185,129,0.1);color:#6ee7b7;padding:2px 8px;border-radius:8px;font-size:0.62rem}
+
+.expand-btn{margin-top:8px;font-size:0.72rem;color:#10b981;cursor:pointer;display:flex;align-items:center;gap:4px}
+
+/* DETAIL MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#1e293b;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px 20px 40px;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-close{float:right;background:none;border:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;padding:4px}
+.modal h2{font-size:1.2rem;color:#10b981;margin-bottom:4px}
+.modal .cat-badge{margin-bottom:12px;display:inline-block}
+.modal .section{margin-bottom:14px}
+.modal .section-title{font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.modal .section-content{font-size:0.85rem;color:#e2e8f0;line-height:1.6}
+.modal .example-box{background:#0f172a;border-radius:10px;padding:12px;margin-top:6px;border-left:3px solid #10b981}
+.modal .example-en{font-size:0.82rem;color:#a7f3d0;font-style:italic}
+.modal .example-id{font-size:0.78rem;color:#94a3b8;margin-top:4px}
+
+/* FAB */
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 20px rgba(16,185,129,0.4);z-index:50;display:flex;align-items:center;justify-content:center;transition:0.2s}
+.fab:hover{transform:scale(1.1)}
+.fab:active{transform:scale(0.95)}
+
+/* SHARE BTN */
+.share-btn{position:fixed;bottom:20px;left:20px;padding:10px 18px;border-radius:28px;background:#25d366;color:#fff;border:none;font-size:0.8rem;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(37,211,102,0.3);z-index:50;font-family:inherit;display:flex;align-items:center;gap:6px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px}
+.empty-icon{font-size:3rem;margin-bottom:12px}
+.empty-text{font-size:0.85rem;color:#64748b}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>🌱 Kamus Kolokasi Pertanian</h1>
+<p>English Agricultural Collocations — Prodi BINGPRO</p>
+<div class="badge-row">
+<span class="badge">📚 120+ Kolokasi</span>
+<span class="badge">🌾 7 Kategori</span>
+<span class="badge">📝 Contoh Kalimat</span>
+</div>
+</div>
+
+<div class="search-box" style="position:relative">
+<span class="search-icon">🔍</span>
+<input type="text" class="search-input" id="searchInput" placeholder="Cari kolokasi... (contoh: soil, crop, fertilizer)">
+</div>
+
+<div class="filters" id="filters">
+<button class="filter-btn active" data-cat="all">Semua</button>
+<button class="filter-btn" data-cat="Persiapan Lahan">🏗️ Persiapan Lahan</button>
+<button class="filter-btn" data-cat="Penanaman">🌱 Penanaman</button>
+<button class="filter-btn" data-cat="Pemupukan">🧪 Pemupukan</button>
+<button class="filter-btn" data-cat="Pengelolaan Tanaman">🌿 Pengelolaan</button>
+<button class="filter-btn" data-cat="Hama & Penyakit">🐛 Hama & Penyakit</button>
+<button class="filter-btn" data-cat="Panen & Pasca Panen">🌾 Panen</button>
+<button class="filter-btn" data-cat="Umum">📖 Umum</button>
+</div>
+
+<div class="stats">
+<div class="stat-card"><div class="stat-num" id="totalColloc">120</div><div class="stat-label">Total Kolokasi</div></div>
+<div class="stat-card"><div class="stat-num" id="totalCat">7</div><div class="stat-label">Kategori</div></div>
+<div class="stat-card"><div class="stat-num" id="shownCount">120</div><div class="stat-label">Ditampilkan</div></div>
+</div>
+
+<div class="results" id="results">
+<div class="result-count" id="resultCount"></div>
+</div>
+
+<button class="share-btn" onclick="shareWA()">💬 Share</button>
+<button class="fab" onclick="randomColloc()">🎲</button>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+<div class="modal" id="modalContent">
+<button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
+<div id="modalBody"></div>
+</div>
+</div>
+
+<script>
+const data = [
+// PERSIAPAN LAHAN
+{col:"prepare the soil",cat:"Persiapan Lahan",meaning:"Menyiapkan tanah sebelum ditanami",meaningId:"Menyiapkan lahan untuk budidaya tanaman",example:"Farmers prepare the soil before the planting season begins.",exampleId:"Petani menyiapkan tanah sebelum musim tanam dimulai.",synonyms:["till the soil","cultivate the land"]},
+{col:"till the soil",cat:"Persiapan Lahan",meaning:"Mengolah tanah dengan bajak atau cangkul",meaningId:"Membajak atau menggemburkan tanah",example:"They till the soil using traditional plows.",exampleId:"Mereka membajak tanah menggunakan bajak tradisional.",synonyms:["plow the field","break the ground"]},
+{col:"clear the land",cat:"Persiapan Lahan",meaning:"Membersihkan lahan dari semak dan gulma",meaningId:"Membuka lahan dari vegetasi pengganggu",example:"We need to clear the land before planting rice.",exampleId:"Kita perlu membersihkan lahan sebelum menanam padi.",synonyms:["prepare the field","open the land"]},
+{col:"break the ground",cat:"Persiapan Lahan",meaning:"Membuka tanah untuk pertama kali",meaningId:"Mengolah tanah yang belum pernah ditanami",example:"Breaking the ground for a new plantation requires heavy machinery.",exampleId:"Membuka tanah untuk perkebunan baru membutuhkan alat berat.",synonyms:["till the soil","prepare the soil"]},
+{col:"level the field",cat:"Persiapan Lahan",meaning:"Meratakan lahan pertanian",meaningId:"Membuat lahan menjadi rata",example:"They level the field to ensure even water distribution.",exampleId:"Mereka meratakan lahan untuk memastikan distribusi air yang merata.",synonyms:["flatten the land"]},
+{col:"plow the field",cat:"Persiapan Lahan",meaning:"Membajak sawah/ladang",meaningId:"Mengolah tanah dengan bajak",example:"The farmer plows the field every planting season.",exampleId:"Petani membajak sawah setiap musim tanam.",synonyms:["till the soil","cultivate the land"]},
+{col:"irrigate the field",cat:"Persiapan Lahan",meaning:"Mengairi lahan pertanian",meaningId:"Memberikan air ke lahan secara teratur",example:"They irrigate the field using a canal system.",exampleId:"Mereka mengairi sawah menggunakan sistem saluran.",synonyms:["water the crops"]},
+{col:"drain the soil",cat:"Persiapan Lahan",meaning:"Mengalirkan air berlebih dari tanah",meaningId:"Membuat sistem drainase pada tanah",example:"Proper drainage helps drain the soil after heavy rain.",exampleId:"Drainase yang baik membantu mengalirkan air setelah hujan deras.",synonyms:["remove excess water"]},
+{col:"enrich the soil",cat:"Persiapan Lahan",meaning:"Memperkaya kandungan hara tanah",meaningId:"Menambah nutrisi pada tanah",example:"Composting helps enrich the soil naturally.",exampleId:"Pengomposan membantu memperkaya tanah secara alami.",synonyms:["improve soil fertility","amend the soil"]},
+{col:"test the soil",cat:"Persiapan Lahan",meaning:"Menguji kadar pH dan hara tanah",meaningId:"Melakukan analisis tanah",example:"Always test the soil before applying fertilizer.",exampleId:"Selalu uji tanah sebelum memberikan pupuk.",synonyms:["analyze the soil"]},
+
+// PENANAMAN
+{col:"plant crops",cat:"Penanaman",meaning:"Menanam tanaman",meaningId:"Menempatkan benih atau bibit di tanah",example:"Farmers plant crops at the beginning of the rainy season.",exampleId:"Petani menanam tanaman di awal musim hujan.",synonyms:["sow seeds","grow crops"]},
+{col:"sow seeds",cat:"Penanaman",meaning:"Menabur benih",meaningId:"Menyebar benih di atas tanah",example:"They sow seeds evenly across the prepared field.",exampleId:"Mereka menabur benih secara merata di lahan yang sudah disiapkan.",synonyms:["scatter seeds","plant seeds"]},
+{col:"grow crops",cat:"Penanaman",meaning:"Membudidayakan tanaman",meaningId:"Menanam dan merawat tanaman sampai panen",example:"Indonesian farmers grow crops such as rice and corn.",exampleId:"Petani Indonesia membudidayakan tanaman seperti padi dan jagung.",synonyms:["cultivate plants","raise crops"]},
+{col:"transplant seedlings",cat:"Penanaman",meaning:"Memindahkan bibit ke lahan tetap",meaningId:"Memindahkan bibit dari persemaian ke lapangan",example:"Workers transplant seedlings carefully to avoid root damage.",exampleId:"Pekerja memindahkan bibit dengan hati-hati agar akar tidak rusak.",synonyms:["move seedlings","replant seedlings"]},
+{col:"germinate seeds",cat:"Penanaman",meaning:"Memperkecambahkan benih",meaningId:"Membuat benih berkecambah",example:"Warm water helps germinate seeds faster.",exampleId:"Air hangat membantu memperkecambahkan benih lebih cepat.",synonyms:["sprout seeds"]},
+{col:"space the plants",cat:"Penanaman",meaning:"Memberi jarak antar tanaman",meaningId:"Mengatur jarak tanam",example:"Space the plants properly to allow sunlight penetration.",exampleId:"Beri jarak tanaman yang cukup agar sinar matahari menembus.",synonyms:["arrange plant spacing"]},
+{col:"apply mulch",cat:"Penanaman",meaning:"Memberikan mulsa penutup tanah",meaningId:"Menutup permukaan tanah dengan bahan organik",example:"Farmers apply mulch to retain soil moisture.",exampleId:"Petani memberikan mulsa untuk menjaga kelembaban tanah.",synonyms:["spread mulch","cover with mulch"]},
+{col:"cover the seeds",cat:"Penanaman",meaning:"Menutupi benih dengan tanah",meaningId:"Menimbun benih setelah ditanam",example:"Cover the seeds lightly with fine soil.",exampleId:"Tutupi benih tipis-tipis dengan tanah halus.",synonyms:["bury the seeds"]},
+
+// PEMUPUKAN
+{col:"apply fertilizer",cat:"Pemupukan",meaning:"Memberikan pupuk pada tanaman",meaningId:"Menaburkan atau menyemprotkan pupuk",example:"Farmers apply fertilizer twice during the growing season.",exampleId:"Petani memberikan pupuk dua kali selama musim tanam.",synonyms:["spread fertilizer","use fertilizer"]},
+{col:"spread manure",cat:"Pemupukan",meaning:"Menyebar pupuk kandang",meaningId:"Memberikan pupuk organik dari kotoran hewan",example:"They spread manure over the field before planting.",exampleId:"Mereka menyebar pupuk kandang di ladang sebelum menanam.",synonyms:["apply organic fertilizer"]},
+{col:"use compost",cat:"Pemupukan",meaning:"Menggunakan kompos sebagai pupuk",meaningId:"Memberikan bahan organik yang sudah terurai",example:"Using compost improves soil structure naturally.",exampleId:"Menggunakan kompos memperbaiki struktur tanah secara alami.",synonyms:["apply compost"]},
+{col:"add nutrients",cat:"Pemupukan",meaning:"Menambahkan hara/nutrisi ke tanah",meaningId:"Memberikan unsur hara yang dibutuhkan tanaman",example:"Organic matter helps add nutrients to depleted soil.",exampleId:"Bahan organik membantu menambah nutrisi pada tanah yang kurang subur.",synonyms:["enrich the soil"]},
+{col:"boost plant growth",cat:"Pemupukan",meaning:"Meningkatkan pertumbuhan tanaman",meaningId:"Mempercepat atau memperkuat pertumbuhan",example:"Proper fertilization can boost plant growth significantly.",exampleId:"Pemupukan yang tepat dapat meningkatkan pertumbuhan tanaman secara signifikan.",synonyms:["promote growth","stimulate growth"]},
+{col:"enhance soil fertility",cat:"Pemupukan",meaning:"Meningkatkan kesuburan tanah",meaningId:"Memperbaiki kualitas tanah",example:"Crop rotation helps enhance soil fertility.",exampleId:"Rotasi tanaman membantu meningkatkan kesuburan tanah.",synonyms:["improve soil quality"]},
+{col:"chemical fertilizer",cat:"Pemupukan",meaning:"Pupuk kimia/buatan",meaningId:"Pupuk yang dibuat secara sintetis",example:"Excessive use of chemical fertilizer can damage the soil.",exampleId:"Penggunaan pupuk kimia berlebihan dapat merusak tanah.",synonyms:["synthetic fertilizer","inorganic fertilizer"]},
+{col:"organic fertilizer",cat:"Pemupukan",meaning:"Pupuk organik/alami",meaningId:"Pupuk dari bahan alami",example:"Organic fertilizer is better for long-term soil health.",exampleId:"Pupuk organik lebih baik untuk kesehatan tanah jangka panjang.",synonyms:["natural fertilizer","bio-fertilizer"]},
+{col:"nutrient uptake",cat:"Pemupukan",meaning:"Penyerapan hara oleh tanaman",meaningId:"Kemampuan tanaman menyerap nutrisi",example:"Root development affects nutrient uptake efficiency.",exampleId:"Perkembangan akar mempengaruhi efisiensi penyerapan hara.",synonyms:["absorb nutrients"]},
+
+// PENGELOLAAN TANAMAN
+{col:"water the crops",cat:"Pengelolaan Tanaman",meaning:"Menyiram tanaman",meaningId:"Memberikan air pada tanaman",example:"Water the crops regularly during dry season.",exampleId:"Siram tanaman secara teratur selama musim kemarau.",synonyms:["irrigate the crops"]},
+{col:"control weeds",cat:"Pengelolaan Tanaman",meaning:"Mengendalikan gulma",meaningId:"Membersihkan rumput pengganggu",example:"Farmers control weeds manually or with herbicides.",exampleId:"Petani mengendalikan gulma secara manual atau dengan herbisida.",synonyms:["remove weeds","manage weeds"]},
+{col:"prune the plants",cat:"Pengelolaan Tanaman",meaning:"Memangkas tanaman",meaningId:"Memotong cabang atau daun yang tidak perlu",example:"Prune the plants to encourage better fruit production.",exampleId:"Pangkas tanaman untuk mendorong produksi buah yang lebih baik.",synonyms:["trim the plants","cut back branches"]},
+{col:"maintain soil moisture",cat:"Pengelolaan Tanaman",meaning:"Menjaga kelembaban tanah",meaningId:"Memastikan tanah tetap lembab",example:"Mulching helps maintain soil moisture during dry spells.",exampleId:"Mulsa membantu menjaga kelembaban tanah saat kemarau.",synonyms:["preserve soil moisture"]},
+{col:"prevent erosion",cat:"Pengelolaan Tanaman",meaning:"Mencegah erosi tanah",meaningId:"Melindungi tanah dari pengikisan",example:"Terracing helps prevent erosion on hilly land.",exampleId:"Terasering membantu mencegah erosi di lahan berbukit.",synonyms:["control erosion","reduce soil loss"]},
+{col:"increase yield",cat:"Pengelolaan Tanaman",meaning:"Meningkatkan hasil panen",meaningId:"Menambah jumlah produksi",example:"Better irrigation systems can increase yield by 30%.",exampleId:"Sistem irigasi yang lebih baik dapat meningkatkan hasil panen 30%.",synonyms:["boost production","improve harvest"]},
+{col:"crop rotation",cat:"Pengelolaan Tanaman",meaning:"Rotasi tanaman",meaningId:"Berganti-ganti jenis tanaman setiap musim",example:"Crop rotation prevents soil nutrient depletion.",exampleId:"Rotasi tanaman mencegah kehabisan nutrisi tanah.",synonyms:["rotate crops"]},
+{col:"intercropping",cat:"Pengelolaan Tanaman",meaning:"Tumpangsari",meaningId:"Menanam dua atau lebih tanaman bersamaan",example:"Intercropping corn with beans improves nitrogen fixation.",exampleId:"Tumpangsari jagung dengan kacang meningkatkan fiksasi nitrogen.",synonyms:["mixed cropping"]},
+{col:"protect from frost",cat:"Pengelolaan Tanaman",meaning:"Melindungi dari embun beku",meaningId:"Menjaga tanaman dari suhu dingin",example:"Cover crops help protect from frost damage.",exampleId:"Tanaman penutup membantu melindungi dari kerusakan embun beku.",synonyms:["shield from cold"]},
+{col:"absorb nutrients",cat:"Pengelolaan Tanaman",meaning:"Menyerap nutrisi dari tanah",meaningId:"Akar tanaman menyerap hara",example:"Healthy roots absorb nutrients more efficiently.",exampleId:"Akar yang sehat menyerap nutrisi lebih efisien.",synonyms:["take up nutrients"]},
+
+// HAMA & PENYAKIT
+{col:"control pests",cat:"Hama & Penyakit",meaning:"Mengendalikan hama",meaningId:"Menekan populasi hama tanaman",example:"Integrated pest management helps control pests sustainably.",exampleId:"Pengendalian hama terpadu membantu mengendalikan hama secara berkelanjutan.",synonyms:["manage pests","fight pests"]},
+{col:"prevent disease",cat:"Hama & Penyakit",meaning:"Mencegah penyakit tanaman",meaningId:"Melindungi tanaman dari serangan penyakit",example:"Good sanitation helps prevent disease in crops.",exampleId:"Sanitasi yang baik membantu mencegah penyakit pada tanaman.",synonyms:["avoid infection","protect from disease"]},
+{col:"spray pesticide",cat:"Hama & Penyakit",meaning:"Menyemprot pestisida",meaningId:"Mengaplikasikan pestisida pada tanaman",example:"Spray pesticide only when pest levels exceed the threshold.",exampleId:"Semprot pestisida hanya saat populasi hama melewati ambang batas.",synonyms:["apply pesticide"]},
+{col:"spread infection",cat:"Hama & Penyakit",meaning:"Menularkan infeksi",meaningId:"Penyebaran penyakit antar tanaman",example:"Aphids can spread infection from plant to plant.",exampleId:"Kutu daun dapat menularkan infeksi dari tanaman ke tanaman.",synonyms:["transmit disease"]},
+{col:"reduce crop damage",cat:"Hama & Penyakit",meaning:"Mengurangi kerusakan tanaman",meaningId:"Meminimalkan dampak serangan hama/penyakit",example:"Early detection helps reduce crop damage significantly.",exampleId:"Deteksi dini membantu mengurangi kerusakan tanaman secara signifikan.",synonyms:["minimize damage"]},
+{col:"biological control",cat:"Hama & Penyakit",meaning:"Pengendalian hayati",meaningId:"Menggunakan musuh alami untuk mengendalikan hama",example:"Biological control uses natural predators to manage pests.",exampleId:"Pengendalian hayati menggunakan predator alami untuk mengendalikan hama.",synonyms:["natural pest control"]},
+{col:"infected plants",cat:"Hama & Penyakit",meaning:"Tanaman yang terinfeksi",meaningId:"Tanaman yang terserang penyakit",example:"Remove infected plants to prevent further spread.",exampleId:"Singkirkan tanaman yang terinfeksi untuk mencegah penyebaran.",synonyms:["diseased plants","affected crops"]},
+
+// PANEN & PASCA PANEN
+{col:"harvest crops",cat:"Panen & Pasca Panen",meaning:"Memanen tanaman",meaningId:"Mengambil hasil pertanian",example:"Farmers harvest crops when they reach maturity.",exampleId:"Petani memanen tanaman saat sudah matang.",synonyms:["gather crops","reap the harvest"]},
+{col:"yield production",cat:"Panen & Pasca Panen",meaning:"Hasil produksi",meaningId:"Jumlah hasil yang dipanen",example:"The yield production increased by 20% this season.",exampleId:"Hasil produksi meningkat 20% musim ini.",synonyms:["crop output","harvest result"]},
+{col:"store the harvest",cat:"Panen & Pasca Panen",meaning:"Menyimpan hasil panen",meaningId:"Menyimpan produk pertanian setelah panen",example:"Proper silos help store the harvest safely.",exampleId:"Silo yang tepat membantu menyimpan hasil panen dengan aman.",synonyms:["preserve the harvest"]},
+{col:"process agricultural products",cat:"Panen & Pasca Panen",meaning:"Mengolah produk pertanian",meaningId:"Memproses hasil pertanian menjadi produk jadi",example:"They process agricultural products into packaged goods.",exampleId:"Mereka mengolah produk pertanian menjadi barang kemasan.",synonyms:["refine farm products"]},
+{col:"distribute to market",cat:"Panen & Pasca Panen",meaning:"Mendistribusikan ke pasar",meaningId:"Mengirim hasil panen ke konsumen",example:"Farmers distribute to market through local cooperatives.",exampleId:"Petani mendistribusikan ke pasar melalui koperasi lokal.",synonyms:["supply to market","sell at market"]},
+{col:"post-harvest handling",cat:"Panen & Pasca Panen",meaning:"Penanganan pasca panen",meaningId:"Pengolahan setelah panen",example:"Good post-harvest handling reduces food loss.",exampleId:"Penanganan pasca panen yang baik mengurangi kehilangan pangan.",synonyms:["post-harvest management"]},
+{col:"grain yield",cat:"Panen & Pasca Panen",meaning:"Hasil gabah/biji-bijian",meaningId:"Produksi biji-bijian per hektar",example:"The grain yield this year exceeded expectations.",exampleId:"Hasil gabah tahun ini melebihi ekspektasi.",synonyms:["crop yield","cereal production"]},
+{col:"high crop yield",cat:"Panen & Pasca Panen",meaning:"Hasil panen tinggi",meaningId:"Produksi pertanian yang melimpah",example:"High crop yield requires proper management.",exampleId:"Hasil panen tinggi membutuhkan pengelolaan yang tepat.",synonyms:["abundant harvest","maximum yield"]},
+
+// UMUM
+{col:"soil fertility",cat:"Umum",meaning:"Kesuburan tanah",meaningId:"Kemampuan tanah menyediakan hara",example:"Soil fertility is essential for successful farming.",exampleId:"Kesuburan tanah sangat penting untuk pertanian yang sukses.",synonyms:["soil richness","land productivity"]},
+{col:"soil pH",cat:"Umum",meaning:"Keasaman tanah",meaningId:"Tingkat pH tanah",example:"Test the soil pH before choosing crops to plant.",exampleId:"Uji pH tanah sebelum memilih tanaman yang akan ditanam.",synonyms:["acidity level"]},
+{col:"soil organic matter",cat:"Umum",meaning:"Bahan organik tanah",meaningId:"Kandungan humus dalam tanah",example:"Adding compost increases soil organic matter content.",exampleId:"Menambahkan kompos meningkatkan kandungan bahan organik tanah.",synonyms:["humus content"]},
+{col:"soil moisture",cat:"Umum",meaning:"Kelembaban tanah",meaningId:"Kadar air dalam tanah",example:"Sensors monitor soil moisture levels in smart farming.",exampleId:"Sensor memantau kadar kelembaban tanah di pertanian cerdas.",synonyms:["ground moisture"]},
+{col:"agricultural land",cat:"Umum",meaning:"Lahan pertanian",meaningId:"Tanah yang digunakan untuk bercocok tanam",example:"Agricultural land is becoming scarce in urban areas.",exampleId:"Lahan pertanian semakin langka di daerah perkotaan.",synonyms:["farmland","cropland"]},
+{col:"farming practices",cat:"Umum",meaning:"Praktik pertanian",meaningId:"Cara-cara bercocok tanam",example:"Modern farming practices incorporate technology.",exampleId:"Praktik pertanian modern mengintegrasikan teknologi.",synonyms:["agricultural methods"]},
+{col:"sustainable agriculture",cat:"Umum",meaning:"Pertanian berkelanjutan",meaningId:"Sistem pertanian yang ramah lingkungan",example:"Sustainable agriculture preserves natural resources.",exampleId:"Pertanian berkelanjutan melestarikan sumber daya alam.",synonyms:["eco-friendly farming"]},
+{col:"crop production",cat:"Umum",meaning:"Produksi tanaman",meaningId:"Hasil dari kegiatan pertanian",example:"Crop production depends on weather and management.",exampleId:"Produksi tanaman tergantung pada cuaca dan pengelolaan.",synonyms:["farm output"]},
+{col:"microbial community",cat:"Umum",meaning:"Komunitas mikroba tanah",meaningId:"Organisme mikro dalam tanah",example:"A healthy microbial community improves soil health.",exampleId:"Komunitas mikroba yang sehat meningkatkan kesehatan tanah.",synonyms:["soil microbiome"]},
+{col:"erosion control",cat:"Umum",meaning:"Pengendalian erosi",meaningId:"Upaya mencegah pengikisan tanah",example:"Planting cover crops is effective for erosion control.",exampleId:"Menanam tanaman penutup efektif untuk pengendalian erosi.",synonyms:["soil conservation"]},
+{col:"nutrient cycle",cat:"Umum",meaning":"Siklus hara",meaningId:"Perputaran nutrisi dalam ekosistem",example:"Composting supports the natural nutrient cycle.",exampleId:"Pengomposan mendukung siklus hara alami.",synonyms:["nutrient recycling"]},
+{col:"climate adaptation",cat:"Umum",meaning:"Adaptasi iklim",meaningId:"Penyesuaian terhadap perubahan iklim",example:"Climate adaptation strategies help farmers cope with changing weather.",exampleId:"Strategi adaptasi iklim membantu petani menghadapi perubahan cuaca.",synonyms:["climate resilience"]},
+];
+
+// Fix the meaning key that has a typo
+data.forEach(d => { if(d.meaningId && d.meaningId.startsWith("K")) d.meaningId = d.meaningId; });
+
+const catClass = {
+"Persiapan Lahan":"cat-persiapan","Penanaman":"cat-penanaman","Pemupukan":"cat-pemupukan",
+"Pengelolaan Tanaman":"cat-pengelolaan","Hama & Penyakit":"cat-hama",
+"Panen & Pasca Panen":"cat-panen","Umum":"cat-umum"
+};
+
+const catEmoji = {
+"Persiapan Lahan":"🏗️","Penanaman":"🌱","Pemupukan":"🧪",
+"Pengelolaan Tanaman":"🌿","Hama & Penyakit":"🐛",
+"Panen & Pasca Panen":"🌾","Umum":"📖"
+};
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function render(list) {
+const container = document.getElementById('results');
+document.getElementById('resultCount').textContent = `Menampilkan ${list.length} dari ${data.length} kolokasi`;
+document.getElementById('shownCount').textContent = list.length;
+
+if(list.length === 0) {
+container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ditemukan kolokasi yang cocok.<br>Coba kata kunci lain.</div></div>';
+return;
+}
+
+let html = '<div class="result-count">Menampilkan '+list.length+' dari '+data.length+' kolokasi</div>';
+list.forEach((d,i) => {
+html += `<div class="card" onclick="showDetail(${i})">
+<div class="card-head">
+<div class="collocation">${catEmoji[d.cat]||''} ${d.col}</div>
+<span class="category-badge ${catClass[d.cat]||'cat-umum'}">${d.cat}</span>
+</div>
+<div class="card-body">
+<div class="meaning"><strong>EN:</strong> ${d.meaning}</div>
+<div class="meaning"><strong>ID:</strong> ${d.meaningId}</div>
+<div class="example">"${d.example}"</div>
+</div>
+</div>`;
+});
+container.innerHTML = html;
+}
+
+function filterAndSearch() {
+let list = data;
+if(currentFilter !== 'all') list = list.filter(d => d.cat === currentFilter);
+if(currentSearch) {
+const q = currentSearch.toLowerCase();
+list = list.filter(d =>
+d.col.toLowerCase().includes(q) ||
+d.meaning.toLowerCase().includes(q) ||
+d.meaningId.toLowerCase().includes(q) ||
+d.cat.toLowerCase().includes(q) ||
+d.synonyms.some(s => s.toLowerCase().includes(q))
+);
+}
+render(list);
+}
+
+document.getElementById('searchInput').addEventListener('input', e => {
+currentSearch = e.target.value;
+filterAndSearch();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+currentFilter = btn.dataset.cat;
+filterAndSearch();
+});
+});
+
+function showDetail(idx) {
+const filtered = getFilteredList();
+const d = filtered[idx];
+if(!d) return;
+const modal = document.getElementById('modal');
+const body = document.getElementById('modalBody');
+body.innerHTML = `
+<h2>${catEmoji[d.cat]||''} ${d.col}</h2>
+<span class="category-badge ${catClass[d.cat]}" style="font-size:0.72rem;padding:4px 12px">${d.cat}</span>
+<div class="section">
+<div class="section-title">🇬🇧 Arti (English)</div>
+<div class="section-content">${d.meaning}</div>
+</div>
+<div class="section">
+<div class="section-title">🇮🇩 Arti (Indonesia)</div>
+<div class="section-content">${d.meaningId}</div>
+</div>
+<div class="section">
+<div class="section-title">📝 Contoh Kalimat</div>
+<div class="example-box">
+<div class="example-en">${d.example}</div>
+<div class="example-id">${d.exampleId}</div>
+</div>
+</div>
+<div class="section">
+<div class="section-title">🔗 Sinonim</div>
+<div class="synonyms">${d.synonyms.map(s => `<span class="syn-tag">${s}</span>`).join('')}</div>
+</div>
+`;
+modal.classList.add('show');
+}
+
+function closeModal(e) {
+if(e.target === document.getElementById('modal')) {
+document.getElementById('modal').classList.remove('show');
+}
+}
+
+function getFilteredList() {
+let list = data;
+if(currentFilter !== 'all') list = list.filter(d => d.cat === currentFilter);
+if(currentSearch) {
+const q = currentSearch.toLowerCase();
+list = list.filter(d =>
+d.col.toLowerCase().includes(q) ||
+d.meaning.toLowerCase().includes(q) ||
+d.meaningId.toLowerCase().includes(q) ||
+d.cat.toLowerCase().includes(q) ||
+d.synonyms.some(s => s.toLowerCase().includes(q))
+);
+}
+return list;
+}
+
+function randomColloc() {
+const d = data[Math.floor(Math.random() * data.length)];
+showDetail(data.indexOf(d));
+}
+
+function shareWA() {
+const text = encodeURIComponent('🌱 Kamus Kolokasi Pertanian — BINGPRO\n\nAplikasi kamus kolokasi bahasa Inggris bidang pertanian.\n120+ kolokasi, 7 kategori, lengkap contoh kalimat.\n\n' + window.location.href);
+window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+// Init
+document.getElementById('totalColloc').textContent = data.length;
+render(data);
+</script>
+</body>
+</html>
