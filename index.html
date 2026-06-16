@@ -292,6 +292,14 @@ currentSearch = e.target.value;
 filterAndSearch();
 });
 
+// Also trigger search on Enter key
+document.getElementById('searchInput').addEventListener('keyup', e => {
+if(e.key === 'Enter') {
+currentSearch = e.target.value;
+filterAndSearch();
+}
+});
+
 document.querySelectorAll('.filter-btn').forEach(btn => {
 btn.addEventListener('click', () => {
 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -419,10 +427,21 @@ return result;
 
 // Init
 async function init() {
-document.getElementById('totalColloc').textContent = data.length;
-const fromSheet = await loadFromSheet();
+// Always render built-in data first
 document.getElementById('totalColloc').textContent = data.length;
 render(data);
+
+// Then try to load from Google Sheet (optional upgrade)
+try {
+const fromSheet = await loadFromSheet();
+if(fromSheet) {
+document.getElementById('totalColloc').textContent = data.length;
+render(data);
+}
+} catch(e) {
+console.log('Sheet load error (using built-in data): ' + e.message);
+document.getElementById('sheetStatus').textContent = '📊 Data bawaan (offline)';
+}
 }
 init();
 </script>
