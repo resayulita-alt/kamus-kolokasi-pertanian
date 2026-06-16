@@ -246,17 +246,19 @@ let currentSearch = '';
 
 function render(list) {
 const container = document.getElementById('results');
-document.getElementById('resultCount').textContent = `Menampilkan ${list.length} dari ${data.length} kolokasi`;
-document.getElementById('shownCount').textContent = list.length;
+const rc = document.getElementById('resultCount');
+if(rc) rc.textContent = `Menampilkan ${list.length} dari ${data.length} kolokasi`;
+const sc = document.getElementById('shownCount');
+if(sc) sc.textContent = list.length;
 
 if(list.length === 0) {
-container.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ditemukan kolokasi yang cocok.<br>Coba kata kunci lain.</div></div>';
+container.innerHTML = '<div class="result-count">Menampilkan 0 dari '+data.length+' kolokasi</div><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ditemukan kolokasi yang cocok.<br>Coba kata kunci lain.</div></div>';
 return;
 }
 
 let html = '<div class="result-count">Menampilkan '+list.length+' dari '+data.length+' kolokasi</div>';
 list.forEach((d,i) => {
-html += `<div class="card" onclick="showDetail(${i})">
+html += `<div class="card" onclick="showDetail(${i}, event)">
 <div class="card-head">
 <div class="collocation">${catEmoji[d.cat]||''} ${d.col}</div>
 <span class="category-badge ${catClass[d.cat]||'cat-umum'}">${d.cat}</span>
@@ -309,7 +311,7 @@ filterAndSearch();
 });
 });
 
-function showDetail(idx) {
+function showDetail(idx, e) {
 const filtered = getFilteredList();
 const d = filtered[idx];
 if(!d) return;
@@ -339,8 +341,7 @@ body.innerHTML = `
 </div>
 `;
 modal.classList.add('show');
-// Prevent click from bubbling to overlay
-event && event.stopPropagation && event.stopPropagation();
+if(e) e.stopPropagation();
 }
 
 function closeModal(e) {
@@ -381,7 +382,9 @@ return list;
 
 function randomColloc() {
 const d = data[Math.floor(Math.random() * data.length)];
-showDetail(data.indexOf(d));
+const filtered = getFilteredList();
+const idx = filtered.indexOf(d);
+showDetail(idx >= 0 ? idx : 0);
 }
 
 function shareWA() {
