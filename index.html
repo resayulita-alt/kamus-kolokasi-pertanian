@@ -106,6 +106,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1a;min-height:100vh;color:#e
 <span class="badge">🌾 7 Kategori</span>
 <span class="badge">📝 Contoh Kalimat</span>
 </div>
+<div style="text-align:center;margin-top:4px" id="sheetStatus" class="badge">📊 Memuat data...</div>
 </div>
 
 <div class="search-box" style="position:relative">
@@ -145,7 +146,7 @@ body{font-family:'Inter',sans-serif;background:#0a0f1a;min-height:100vh;color:#e
 </div>
 
 <script>
-const data = [
+let data = [
 // PERSIAPAN LAHAN
 {col:"prepare the soil",cat:"Persiapan Lahan",meaning:"Menyiapkan tanah sebelum ditanami",meaningId:"Menyiapkan lahan untuk budidaya tanaman",example:"Farmers prepare the soil before the planting season begins.",exampleId:"Petani menyiapkan tanah sebelum musim tanam dimulai.",synonyms:["till the soil","cultivate the land"]},
 {col:"till the soil",cat:"Persiapan Lahan",meaning:"Mengolah tanah dengan bajak atau cangkul",meaningId:"Membajak atau menggemburkan tanah",example:"They till the soil using traditional plows.",exampleId:"Mereka membajak tanah menggunakan bajak tradisional.",synonyms:["plow the field","break the ground"]},
@@ -364,9 +365,66 @@ const text = encodeURIComponent('🌱 Kamus Kolokasi Pertanian — BINGPRO\n\nAp
 window.open(`https://wa.me/?text=${text}`, '_blank');
 }
 
+// Google Sheets integration
+const SHEET_ID = '1_48I42U6sSG7hbjvYAiDgb4nYyAX9rYmY3EOBXa_sXI';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Data+Kolokasi`;
+
+async function loadFromSheet() {
+try {
+const resp = await fetch(SHEET_URL);
+if (!resp.ok) throw new Error('Fetch failed');
+const csv = await resp.text();
+const rows = csv.split('\n').filter(r => r.trim());
+if (rows.length < 2) throw new Error('No data');
+const headers = parseCSVRow(rows[0]);
+const sheetData = [];
+for (let i = 1; i < rows.length; i++) {
+const cols = parseCSVRow(rows[i]);
+if (cols.length < 4 || !cols[0]) continue;
+sheetData.push({
+col: cols[0] || '',
+meaning: cols[1] || '',
+meaningId: cols[2] || '',
+cat: cols[3] || 'Umum',
+example: cols[4] || '',
+exampleId: cols[5] || '',
+synonyms: cols[6] ? cols[6].split(',').map(s => s.trim()).filter(Boolean) : []
+});
+}
+if (sheetData.length > 0) {
+data = sheetData;
+document.getElementById('sheetStatus') && (document.getElementById('sheetStatus').textContent = '📊 Data dari Google Sheet (live)');
+console.log('Loaded ' + sheetData.length + ' collocations from Google Sheet');
+return true;
+}
+} catch(e) {
+console.log('Google Sheet unavailable, using built-in data: ' + e.message);
+}
+return false;
+}
+
+function parseCSVRow(row) {
+const result = [];
+let current = '';
+let inQuotes = false;
+for (let i = 0; i < row.length; i++) {
+const ch = row[i];
+if (ch === '"') { inQuotes = !inQuotes; }
+else if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+else { current += ch; }
+}
+result.push(current.trim());
+return result;
+}
+
 // Init
+async function init() {
+document.getElementById('totalColloc').textContent = data.length;
+const fromSheet = await loadFromSheet();
 document.getElementById('totalColloc').textContent = data.length;
 render(data);
+}
+init();
 </script>
 </body>
 </html>
